@@ -1,0 +1,299 @@
+#Listas
+productos_activos = []
+productos_inactivos = []
+usuarios = []
+ventas = []
+carrito_actual = []
+usuario_activo = None
+menu_opciones = [
+    "1. Artículos",
+    "2. Usuarios",
+    "3. Ventas / Carrito",
+    "4. Salir",
+]
+#Definiciones y funciones
+def generar_id(lista):
+    if not lista:
+        return 1
+    else:
+        return max(item["id"] for item in lista) + 1
+def leer_int(mensaje):
+    valor = input(mensaje)
+    es_numero = True
+    for c in valor:
+        if c not in "0123456789":
+            es_numero = False
+    if es_numero and valor != "":
+        return int(valor)
+    else:
+        print("Valor no válido.")
+        return leer_int(mensaje)
+def menu(menu_opciones):
+    for i in menu_opciones:
+        print(i)
+    opcion = leer_int("Elige la opción que desee: ")
+    return opcion
+def buscar_por_id(eleccion, lista):
+    for item in lista:
+        if item["id"] == eleccion:
+            return item
+    return None
+def crear_articulo():
+    nombre = input("Dime el nombre del producto: ")
+    precio = input("Dime el precio del producto: ")
+    stock = input("Dime el stock del producto: ")
+    activo_input = input("El producto está activo? True/False: ")
+    id_art = generar_id(productos_activos + productos_inactivos)
+    nuevo_producto = {
+        "id": id_art,
+        "nombre": nombre,
+        "precio": precio,
+        "stock": stock,
+        "activo": activo_input
+    }
+    if activo_input == "True":
+        productos_activos.append(nuevo_producto)
+    else:
+        productos_inactivos.append(nuevo_producto)
+def listar_articulos(eleccion):
+    if eleccion == "activos":
+        for i in productos_activos:
+            print(i)
+    elif eleccion == "inactivos":
+        for i in productos_inactivos:
+            print(i)
+    elif eleccion == "todos":
+        for i in productos_activos + productos_inactivos:
+            print(i)
+def menu_articulos():
+    opcion = 0
+    while opcion != 7:
+        print("1. Crear artículo")
+        print("2. Listar artículos")
+        print("3. Buscar artículos por id")
+        print("4. Actualizar artículo")
+        print("5. Eliminar artículo")
+        print("6. Alternar activo/inactivo")
+        print("7. Volver")
+        opcion = leer_int("Elige una opción: ")
+        match opcion:
+            case 1:
+                crear_articulo()
+            case 2:
+                eleccion = input("¿Ver activos, inactivos o todos? ")
+                listar_articulos(eleccion)
+            case 3:
+                id_buscar = leer_int("Dime la ID del producto: ")
+                encontrado = buscar_por_id(id_buscar, productos_activos + productos_inactivos)
+                if encontrado:
+                    print(encontrado)
+                else:
+                    print("No encontrado")
+            case 4:
+                id_buscar = leer_int("Dime la ID del producto: ")
+                encontrado = buscar_por_id(id_buscar, productos_activos + productos_inactivos)
+                if encontrado:
+                    print(encontrado)
+                    nuevo_nombre = input(f"Nombre ({encontrado['nombre']}): ") or encontrado["nombre"]
+                    nuevo_precio = input(f"Precio ({encontrado['precio']}): ") or encontrado["precio"]
+                    nuevo_stock = input(f"Stock ({encontrado['stock']}): ") or encontrado["stock"]
+                    encontrado["nombre"] = nuevo_nombre
+                    encontrado["precio"] = nuevo_precio
+                    encontrado["stock"] = nuevo_stock
+            case 5:
+                id_buscar = leer_int("Dime la ID del producto: ")
+                encontrado = buscar_por_id(id_buscar, productos_activos + productos_inactivos)
+                if encontrado:
+                    if encontrado in productos_activos:
+                        nueva_lista = [p for p in productos_activos if p != encontrado]
+                        productos_activos[:] = nueva_lista
+                    else:
+                        nueva_lista = [p for p in productos_inactivos if p != encontrado]
+                        productos_inactivos[:] = nueva_lista
+            case 6:
+                id_buscar = leer_int("Dime la ID del producto: ")
+                encontrado = buscar_por_id(id_buscar, productos_activos + productos_inactivos)
+                if encontrado:
+                    if encontrado["activo"] == "True":
+                        encontrado["activo"] = "False"
+                        productos_inactivos.append(encontrado)
+                        productos_activos[:] = [p for p in productos_activos if p != encontrado]
+                    else:
+                        encontrado["activo"] = "True"
+                        productos_activos.append(encontrado)
+                        productos_inactivos[:] = [p for p in productos_inactivos if p != encontrado]
+def crear_usuario():
+    nombre = input("Nombre del usuario: ")
+    email = input("Email: ")
+    if "@" not in email or "." not in email:
+        print("Email no válido")
+        return crear_usuario()
+    id_usr = generar_id(usuarios)
+    usuarios.append({"id": id_usr, "nombre": nombre, "email": email, "activo": True})
+def listar_usuarios(solo_activos=None):
+    lista = usuarios
+    if solo_activos is True:
+        lista = [u for u in usuarios if u["activo"]]
+    for u in lista:
+        print(u)
+def menu_usuarios():
+    opcion = 0
+    while opcion != 7:
+        print("1. Crear usuario")
+        print("2. Listar usuarios")
+        print("3. Buscar usuario por id")
+        print("4. Actualizar usuario")
+        print("5. Eliminar usuario")
+        print("6. Alternar activo/inactivo")
+        print("7. Volver")
+        opcion = leer_int("Elige una opción: ")
+        match opcion:
+            case 1:
+                crear_usuario()
+            case 2:
+                listar_usuarios()
+            case 3:
+                id_buscar = leer_int("ID del usuario: ")
+                encontrado = buscar_por_id(id_buscar, usuarios)
+                print(encontrado if encontrado else "No encontrado")
+            case 4:
+                id_buscar = leer_int("ID del usuario: ")
+                encontrado = buscar_por_id(id_buscar, usuarios)
+                if encontrado:
+                    nuevo_nombre = input(f"Nombre ({encontrado['nombre']}): ") or encontrado["nombre"]
+                    nuevo_email = input(f"Email ({encontrado['email']}): ") or encontrado["email"]
+                    encontrado["nombre"] = nuevo_nombre
+                    encontrado["email"] = nuevo_email
+            case 5:
+                id_buscar = leer_int("ID del usuario: ")
+                encontrado = buscar_por_id(id_buscar, usuarios)
+                if encontrado:
+                    usuarios[:] = [u for u in usuarios if u != encontrado]
+            case 6:
+                id_buscar = leer_int("ID del usuario: ")
+                encontrado = buscar_por_id(id_buscar, usuarios)
+                if encontrado:
+                    encontrado["activo"] = not encontrado["activo"]
+def seleccionar_usuario_activo(usuarios_lista):
+    global usuario_activo
+    id_usr = leer_int("Dime el ID del usuario a seleccionar: ")
+    usuario = buscar_por_id(id_usr, usuarios_lista)
+    if usuario and usuario["activo"]:
+        usuario_activo = id_usr
+        print(f"Usuario activo: {usuario['nombre']}")
+    else:
+        print("Usuario no válido o inactivo")
+def anadir_al_carrito(carrito, productos_activos):
+    id_art = leer_int("ID del artículo: ")
+    articulo = buscar_por_id(id_art, productos_activos)
+    if not articulo or articulo["activo"] != "True":
+        print("Artículo no válido o inactivo")
+        return
+    cantidad = leer_int("Cantidad: ")
+    if cantidad > int(articulo["stock"]):
+        print("No hay suficiente stock")
+        return
+    for i, (art_id, cant) in enumerate(carrito):
+        if art_id == id_art:
+            carrito[i] = (art_id, cant + cantidad)
+            break
+    else:
+        carrito.append((id_art, cantidad))
+def quitar_del_carrito(carrito):
+    id_art = leer_int("ID del artículo a quitar: ")
+    for i, (art_id, _) in enumerate(carrito):
+        if art_id == id_art:
+            carrito[:] = carrito[:i] + carrito[i+1:]
+            break
+    else:
+        print("No estaba en el carrito")
+def ver_carrito(carrito, productos_activos):
+    if not carrito:
+        print("Carrito vacío")
+        return
+    total = 0
+    for articulo_id, cantidad in carrito:
+        articulo = buscar_por_id(articulo_id, productos_activos)
+        if articulo:
+            precio = float(articulo["precio"])
+            subtotal = precio * cantidad
+            total += subtotal
+            print(f'ID: {articulo_id}, Nombre: {articulo["nombre"]}, Cantidad: {cantidad}, Subtotal: {subtotal}')
+    print(f'Total: {total}')
+    return total
+def confirmar_compra(carrito, productos_activos, usuario_activo, ventas):
+    if usuario_activo is None:
+        print("No hay usuario activo")
+        return
+    if not carrito:
+        print("Carrito vacío")
+        return
+    venta_items = []
+    total = 0
+    for articulo_id, cantidad in carrito:
+        articulo = buscar_por_id(articulo_id, productos_activos)
+        if not articulo or articulo["activo"] != "True":
+            print(f"Artículo {articulo_id} no válido")
+            return
+        if cantidad > int(articulo["stock"]):
+            print(f"No hay suficiente stock de {articulo['nombre']}")
+            return
+        precio_unitario = float(articulo["precio"])
+        venta_items.append((articulo_id, cantidad, precio_unitario))
+        total += precio_unitario * cantidad
+    for articulo_id, cantidad, _ in venta_items:
+        articulo = buscar_por_id(articulo_id, productos_activos)
+        articulo["stock"] = int(articulo["stock"]) - cantidad
+    id_venta = 1 if not ventas else max(v["id_venta"] for v in ventas) + 1
+    ventas.append({
+        "id_venta": id_venta,
+        "usuario_id": usuario_activo,
+        "items": venta_items,
+        "total": total
+    })
+    carrito.clear()
+    print(f"Compra confirmada. Total: {total}")
+def historial_ventas_por_usuario(ventas, usuario_id):
+    encontrado = False
+    for venta in ventas:
+        if venta["usuario_id"] == usuario_id:
+            encontrado = True
+            print(f'Venta ID: {venta["id_venta"]}, Total: {venta["total"]}, Items: {venta["items"]}')
+    if not encontrado:
+        print("No hay ventas para este usuario")
+def menu_ventas():
+    global carrito_actual
+    opcion = 0
+    while opcion != 6:
+        print("1. Seleccionar usuario activo")
+        print("2. Añadir artículo al carrito")
+        print("3. Quitar artículo del carrito")
+        print("4. Ver carrito")
+        print("5. Confirmar compra")
+        print("6. Volver")
+        opcion = leer_int("Elige opción: ")
+        match opcion:
+            case 1:
+                seleccionar_usuario_activo(usuarios)
+            case 2:
+                if usuario_activo is None:
+                    print("Primero selecciona un usuario activo")
+                else:
+                    anadir_al_carrito(carrito_actual, productos_activos)
+            case 3:
+                quitar_del_carrito(carrito_actual)
+            case 4:
+                ver_carrito(carrito_actual, productos_activos)
+            case 5:
+                confirmar_compra(carrito_actual, productos_activos, usuario_activo, ventas)
+# Menú principal
+opcion_principal = 0
+while opcion_principal != 4:
+    opcion_principal = menu(menu_opciones)
+    match opcion_principal:
+        case 1:
+            menu_articulos()
+        case 2:
+            menu_usuarios()
+        case 3:
+            menu_ventas()
