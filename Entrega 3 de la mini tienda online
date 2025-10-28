@@ -196,7 +196,6 @@ def anadir_al_carrito(carrito, productos_activos):
     for i, (art_id, cant) in enumerate(carrito):
         if art_id == id_art:
             carrito[i] = (art_id, cant + cantidad)
-            break
     else:
         carrito.append((id_art, cantidad))
 def quitar_del_carrito(carrito):
@@ -204,7 +203,6 @@ def quitar_del_carrito(carrito):
     for i, (art_id, _) in enumerate(carrito):
         if art_id == id_art:
             carrito[:] = carrito[:i] + carrito[i+1:]
-            break
     else:
         print("No estaba en el carrito")
 def ver_carrito(carrito, productos_activos):
